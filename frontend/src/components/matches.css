@@ -1,0 +1,43 @@
+.matches {
+  height: 100%;
+}
+
+.matches-card {
+  padding: 32px;
+  display: grid;
+  grid-template-columns: 128px 4fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  grid-template-areas:
+    "image title price size"
+    "image title reactions reactions";
+}
+@media only screen and (max-width: 600px) {
+  .matches-card {
+    grid-template-columns: 128px 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-areas:
+      "image title title"
+      "image price size"
+      "image reactions reactions";
+  }
+}
+
+.matches-card-img {
+  grid-area: image;
+}
+
+.matches-card-title {
+  grid-area: title;
+}
+
+.matches-card-price {
+  grid-area: price;
+}
+
+.matches-card-size {
+  grid-area: size;
+}
+
+.matches-card-reactions {
+  grid-area: reactions;
+}

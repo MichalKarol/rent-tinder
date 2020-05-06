@@ -1,0 +1,50 @@
+.offers {
+  display: grid;
+  grid-template-rows: 60vmin auto;
+  height: 100%;
+  position: relative;
+}
+.offer-imagediv {
+  text-align: center;
+}
+.offer-image {
+  height: 60vmin;
+  display: block;
+  margin: auto;
+}
+
+.offer-details {
+  background-color: #3a3a3a;
+  color: #f8f9fa;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "title title"
+    "price size";
+}
+
+.offer-description {
+  background-color: #f8f9fa;
+  color: #3a3a3a;
+  padding: 16px;
+  padding-bottom: 10%;
+}
+
+.offer-footer {
+  background-color: #3a3a3a;
+  color: #f8f9fa;
+  padding: 16px;
+  height: 10%;
+  position: sticky;
+  width: 100vw;
+  position: fixed;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-column-gap: 8px;
+  border-top: 1px solid #f8f9fa;
+}
+.offer-footer button {
+  margin-top: 0;
+}
