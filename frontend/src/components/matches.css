@@ -41,3 +41,7 @@
 .matches-card-reactions {
   grid-area: reactions;
 }
+.matches-filters {
+  display: flex;
+  justify-content: space-evenly;
+}

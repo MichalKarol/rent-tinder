@@ -12,6 +12,7 @@ export function Header() {
         <Nav className="mr-auto">
           <Nav.Link href="/offers">Oferty</Nav.Link>
           <Nav.Link href="/matches">Matche</Nav.Link>
+          <Nav.Link href="/options">Opcje</Nav.Link>
           <Nav.Link
             onClick={() => {
               authContext.setToken("");

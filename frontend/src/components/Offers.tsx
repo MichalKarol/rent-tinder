@@ -4,11 +4,15 @@ import { Carousel, Button } from "react-bootstrap";
 import "./offers.css";
 import { RentOffer } from "../types";
 import { useAuthenticatedIO } from "../authenticated-io";
+import { FilteringContext } from "../filters";
 
 export function Offers() {
   const auth = useContext(AuthenticationContext);
+  const { filters: globalFilters } = useContext(FilteringContext);
   const { getRentOffers, sendReaction } = useAuthenticatedIO(auth.token);
-  const [data, setData] = useState<null | "loading" | Array<RentOffer>>(null);
+  const [rawdata, setRawData] = useState<null | "loading" | Array<RentOffer>>(
+    null
+  );
   const [index, setIndex] = useState<number>(0);
   const [photoIndex, setPhotoIndex] = useState<number>(0);
 
@@ -39,74 +43,86 @@ export function Offers() {
     return Math.min(vh(v), vw(v));
   }
 
-  if (data === null) {
-    getRentOffers().then((offers) => setData(offers));
-    setData("loading");
+  if (rawdata === null) {
+    getRentOffers().then((offers) => setRawData(offers));
+    setRawData("loading");
   }
 
-  if (!data) return null;
+  if (!rawdata) return null;
+  if (rawdata === "loading") return <div className="offers">Ładowanie</div>;
+
+  const data = rawdata.filter(
+    (e) =>
+      (!globalFilters.minPrice || e.price >= globalFilters.minPrice) &&
+      (!globalFilters.maxPrice || e.price <= globalFilters.maxPrice) &&
+      (!globalFilters.minSize || e.size >= globalFilters.minSize) &&
+      (!globalFilters.maxSize || e.size <= globalFilters.maxSize) &&
+      (!globalFilters.minPricePerMeter ||
+        e.price / e.size >= globalFilters.minPricePerMeter) &&
+      (!globalFilters.maxPricePerMeter ||
+        e.price / e.size >= globalFilters.maxPricePerMeter)
+  );
 
   return (
     <div className="offers">
-      {data === "loading" ? (
-        "Ładowanie"
+      {data.length <= index ? (
+        "Brak ofert"
       ) : (
         <>
-          {data.length <= index ? (
-            "Brak ofert"
-          ) : (
-            <>
-              <Carousel
-                className="offer-images"
-                activeIndex={photoIndex}
-                onSelect={(idx: number) => setPhotoIndex(idx)}
-              >
-                {data[index].image_urls.map((img, idx) => (
-                  <Carousel.Item key={idx}>
-                    <div className="offer-imagediv">
-                      <img
-                        className="offer-image"
-                        src={`${img};s=${vmin(60).toFixed(0)}x${vmin(
-                          60
-                        ).toFixed(0)}`}
-                      />
-                    </div>
-                  </Carousel.Item>
-                ))}
-              </Carousel>
-              <div className="offer-details">
-                <div style={{ gridArea: "title" }}>
-                  <a href={data[index].offer_id} target="_blank">
-                    {data[index].title}
-                  </a>
+          <Carousel
+            className="offer-images"
+            activeIndex={photoIndex}
+            onSelect={(idx: number) => setPhotoIndex(idx)}
+          >
+            {data[index].image_urls.map((img, idx) => (
+              <Carousel.Item key={idx}>
+                <div className="offer-imagediv">
+                  <img
+                    className="offer-image"
+                    src={`${img};s=${vmin(60).toFixed(0)}x${vmin(60).toFixed(
+                      0
+                    )};q=80`}
+                    alt={data[index].title}
+                  />
                 </div>
-                <div style={{ gridArea: "price" }}>{data[index].price} zł</div>
-                <div style={{ gridArea: "size" }}>{data[index].size} m2</div>
-              </div>
+              </Carousel.Item>
+            ))}
+          </Carousel>
+          <div className="offer-details">
+            <div style={{ gridArea: "title" }}>
+              <a
+                href={data[index].offer_id}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {data[index].title}
+              </a>
+            </div>
+            <div style={{ gridArea: "price" }}>{data[index].price} zł</div>
+            <div style={{ gridArea: "size" }}>{data[index].size} m2</div>
+          </div>
 
-              <div className="offer-description">{data[index].description}</div>
-              <div className="offer-footer">
-                <Button
-                  variant="outline-danger"
-                  onClick={() => react(data[index].id, -1)}
-                >
-                  MEH
-                </Button>
-                <Button
-                  variant="outline-light"
-                  onClick={() => react(data[index].id, 0)}
-                >
-                  EH
-                </Button>
-                <Button
-                  variant="outline-success"
-                  onClick={() => react(data[index].id, 1)}
-                >
-                  NICE
-                </Button>
-              </div>
-            </>
-          )}
+          <div className="offer-description">{data[index].description}</div>
+          <div className="offer-footer">
+            <Button
+              variant="outline-danger"
+              onClick={() => react(data[index].id, -1)}
+            >
+              MEH
+            </Button>
+            <Button
+              variant="outline-light"
+              onClick={() => react(data[index].id, 0)}
+            >
+              EH
+            </Button>
+            <Button
+              variant="outline-success"
+              onClick={() => react(data[index].id, 1)}
+            >
+              NICE
+            </Button>
+          </div>
         </>
       )}
     </div>

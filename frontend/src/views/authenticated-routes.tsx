@@ -11,6 +11,7 @@ import { Header } from "../components/Header";
 import "./style.css";
 import { Offers } from "../components/Offers";
 import { Matches } from "../components/Matches";
+import { Options } from "../components/Options";
 
 export function AuthenticatedRoutes() {
   const auth = useContext(AuthenticationContext);
@@ -28,6 +29,9 @@ export function AuthenticatedRoutes() {
             </Route>
             <Route path="/matches">
               <Matches />
+            </Route>
+            <Route path="/options">
+              <Options />
             </Route>
             <Route path="*">
               <Redirect to="/offers" />

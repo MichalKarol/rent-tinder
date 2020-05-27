@@ -5,8 +5,7 @@ from api.models import RentOffer
 
 
 SCRAP_URLS = [
-    "https://www.olx.pl/nieruchomosci/q-wrocław-wynajem-kawalerka?search[order]=created_at%3Adesc",
-    "https://www.olx.pl/nieruchomosci/q-wrocław-wynajem-mieszkanie?search[order]=created_at%3Adesc",
+    "https://www.otodom.pl/wynajem/mieszkanie/wroclaw/?search[region_id]=1&search[subregion_id]=381&search[city_id]=39&search[order]=created_at_first%3Adesc&nrAdsPerPage=72",
 ]
 
 
@@ -19,39 +18,42 @@ def scrapDetails(url):
 
     response = requests.get(url)
     soup = BeautifulSoup(response.text, "html.parser")
-    title = soup.select(".offer-titlebox h1")[0].get_text().strip()
-    images = [strip_size(img.get("src")) for img in soup.select("img.vmiddle")]
+    title = soup.select("h1")[0].get_text().strip()
+    images = {
+        strip_size(img.get("src")) for img in soup.select("figure.thumbsItem img")
+    }
     price = int(
-        soup.select("strong.pricelabel__value")[0].get_text().replace(" ", "")[:-2]
+        next(soup.select(".css-1vr19r7")[0].children).string.replace(" ", "")[:-2]
     )
-    details = soup.select(".offer-details")[0]
-    cells = details.select(".offer-details__name")
+    cells = soup.select(".css-1ci0qpi li")
     rent_th = next(
-        (cell for cell in cells if cell.get_text() == "Czynsz (dodatkowo)"), None
+        (cell for cell in cells if "Czynsz - dodatkowo" in cell.get_text()), None
     )
     rent = (
         0
         if rent_th is None
         else float(
-            rent_th.next_sibling.next_sibling.get_text()
+            rent_th.select("strong")[0]
+            .get_text()
             .strip()
             .replace(",", ".")
             .replace(" ", "")[:-2]
         )
     )
 
-    size_th = next((cell for cell in cells if cell.get_text() == "Powierzchnia"), None)
+    size_th = next((cell for cell in cells if "Powierzchnia" in cell.get_text()), None)
     size = (
         0
         if size_th is None
         else float(
-            size_th.next_sibling.next_sibling.get_text()
+            size_th.select("strong")[0]
+            .get_text()
             .strip()
             .replace(",", ".")
             .replace(" ", "")[:-2]
         )
     )
-    description = soup.find(id="textContent").get_text().strip()
+    description = soup.select(".css-1bi3ib9")[0].get_text().strip()
     return (title, images, price + rent, size, description)
 
 
@@ -63,19 +65,16 @@ class Command(BaseCommand):
 
         for url in SCRAP_URLS:
             page = 1
-            while page < 10:
+            while page < 50:
                 response = requests.get(f"{url}&page={page}")
-                if "q-" not in response.url:
-                    break
                 soup = BeautifulSoup(response.text, "html.parser")
-                details = soup.select("table.offers a.detailsLink") + soup.select(
-                    "table.offers a.detailsLinkPromoted"
-                )
+                details = soup.select(".offer-item-header h3 a")
                 detailsUrls = set(
                     strip_promoted(link.get("href"))
                     for link in details
-                    if "olx.pl" in link.get("href")
+                    if "otodom.pl" in link.get("href")
                 )
+                added = 0
                 for detailsUrl in detailsUrls:
                     if not RentOffer.objects.filter(offer_id=detailsUrl).exists():
                         title, images, price, size, description = scrapDetails(
@@ -83,11 +82,14 @@ class Command(BaseCommand):
                         )
                         RentOffer.objects.create(
                             offer_id=detailsUrl,
-                            source="OLX",
+                            source="OTODOM",
                             title=title,
                             image_urls="\t".join(images),
                             description=description,
                             price=price,
                             size=size,
                         )
+                        added = added + 1
+                if added == 0:
+                    break
                 page = page + 1

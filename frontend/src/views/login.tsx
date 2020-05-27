@@ -62,7 +62,7 @@ export function Login() {
           <Form.Group>
             <Form.Control
               type="text"
-              placeholder="Enter login"
+              placeholder="Login"
               size="lg"
               value={auth.username}
               onChange={(e) => {
@@ -75,7 +75,7 @@ export function Login() {
           <Form.Group>
             <Form.Control
               type="password"
-              placeholder="Password"
+              placeholder="Hasło"
               size="lg"
               value={auth.password}
               onChange={(e) => {
