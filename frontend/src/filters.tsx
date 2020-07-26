@@ -7,6 +7,9 @@ type FilterType = {
   maxSize?: number;
   minPricePerMeter?: number;
   maxPricePerMeter?: number;
+  positiveKeywords: Array<string>;
+  negativeKeywords: Array<string>;
+  blockingKeywords: Array<string>;
 };
 
 export const EMPTY_FILTERS: FilterType = {
@@ -16,6 +19,9 @@ export const EMPTY_FILTERS: FilterType = {
   maxSize: undefined,
   minPricePerMeter: undefined,
   maxPricePerMeter: undefined,
+  positiveKeywords: [],
+  negativeKeywords: [],
+  blockingKeywords: [],
 };
 
 export const FilteringContext = React.createContext<{

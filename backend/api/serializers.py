@@ -15,6 +15,8 @@ class RentOfferSerializer(serializers.ModelSerializer):
             "description",
             "price",
             "size",
+            "latitude",
+            "longitude"
         ]
 
 

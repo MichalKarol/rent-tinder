@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 import requests
 from bs4 import BeautifulSoup
 from api.models import RentOffer
-
+import json
 
 SCRAP_URLS = [
     "https://www.otodom.pl/wynajem/mieszkanie/wroclaw/?search[region_id]=1&search[subregion_id]=381&search[city_id]=39&search[order]=created_at_first%3Adesc&nrAdsPerPage=72",
@@ -18,43 +18,25 @@ def scrapDetails(url):
 
     response = requests.get(url)
     soup = BeautifulSoup(response.text, "html.parser")
-    title = soup.select("h1")[0].get_text().strip()
-    images = {
-        strip_size(img.get("src")) for img in soup.select("figure.thumbsItem img")
-    }
-    price = int(
-        next(soup.select(".css-1vr19r7")[0].children).string.replace(" ", "")[:-2]
-    )
-    cells = soup.select(".css-1ci0qpi li")
-    rent_th = next(
-        (cell for cell in cells if "Czynsz - dodatkowo" in cell.get_text()), None
-    )
-    rent = (
-        0
-        if rent_th is None
-        else float(
-            rent_th.select("strong")[0]
-            .get_text()
-            .strip()
-            .replace(",", ".")
-            .replace(" ", "")[:-2]
-        )
-    )
+    state_json = soup.find(id="server-app-state").contents[0]
+    state_dict = json.loads(state_json)
+    props = state_dict["initialProps"]
+    data = props['data']['advert']
 
-    size_th = next((cell for cell in cells if "Powierzchnia" in cell.get_text()), None)
-    size = (
-        0
-        if size_th is None
-        else float(
-            size_th.select("strong")[0]
-            .get_text()
-            .strip()
-            .replace(",", ".")
-            .replace(" ", "")[:-2]
-        )
-    )
-    description = soup.select(".css-1bi3ib9")[0].get_text().strip()
-    return (title, images, price + rent, size, description)
+    title = data['title']
+    images = {
+        strip_size(img['small']) for img in data['photos']
+    }
+    price = float(data['price']['value'])
+    rent_th = next((cell for cell in data['characteristics'] if cell['key'] == 'rent'), None)
+    rent = (0 if rent_th is None else float(rent_th['value']))
+    size_th = next((cell for cell in data['characteristics'] if cell['key'] == 'm'), None)
+    size = (0 if size_th is None else float(size_th['value']))
+    description = BeautifulSoup(data['description'], "html.parser").get_text().strip()
+    latitude = data['location']['coordinates']['latitude']
+    longitude = data['location']['coordinates']['longitude']
+    print(price, rent, type(price), type(rent))
+    return (title, images, price + rent, size, description, latitude, longitude)
 
 
 class Command(BaseCommand):
@@ -65,7 +47,7 @@ class Command(BaseCommand):
 
         for url in SCRAP_URLS:
             page = 1
-            while page < 50:
+            while page < 15:
                 response = requests.get(f"{url}&page={page}")
                 soup = BeautifulSoup(response.text, "html.parser")
                 details = soup.select(".offer-item-header h3 a")
@@ -77,7 +59,7 @@ class Command(BaseCommand):
                 added = 0
                 for detailsUrl in detailsUrls:
                     if not RentOffer.objects.filter(offer_id=detailsUrl).exists():
-                        title, images, price, size, description = scrapDetails(
+                        title, images, price, size, description, latitude, longitude = scrapDetails(
                             detailsUrl
                         )
                         RentOffer.objects.create(
@@ -88,6 +70,8 @@ class Command(BaseCommand):
                             description=description,
                             price=price,
                             size=size,
+                            latitude=latitude,
+                            longitude=longitude
                         )
                         added = added + 1
                 if added == 0:

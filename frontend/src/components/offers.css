@@ -24,6 +24,12 @@
     "price size";
 }
 
+.offer-map-container,
+#mapid {
+  width: 100vw;
+  height: 30vmin;
+}
+
 .offer-description {
   background-color: #f8f9fa;
   color: #3a3a3a;
@@ -44,6 +50,7 @@
   grid-template-columns: 1fr 1fr 1fr;
   grid-column-gap: 8px;
   border-top: 1px solid #f8f9fa;
+  z-index: 999;
 }
 .offer-footer button {
   margin-top: 0;

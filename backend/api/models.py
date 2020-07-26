@@ -10,6 +10,8 @@ class RentOffer(models.Model):
     description = models.TextField()
     price = models.IntegerField()
     size = models.IntegerField()
+    latitude = models.FloatField(null=True)
+    longitude = models.FloatField(null=True)
 
 
 class Reaction(models.Model):

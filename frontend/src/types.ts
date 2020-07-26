@@ -7,6 +7,8 @@ export type RentOffer = {
   description: string;
   price: number;
   size: number;
+  latitude?: number;
+  longitude?: number;
 };
 
 export type AnnotatedRentOffer = RentOffer & {

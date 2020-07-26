@@ -112,6 +112,60 @@ export function Options() {
           </Container>
         </Form.Group>
 
+        <Form.Group>
+          <Container>
+            <Row>
+              <Col xs={4} sm={4} md={4} lg={4}>
+                <Form.Control
+                  type="text"
+                  placeholder="Pozytywne słowa kluczowe;"
+                  size="lg"
+                  value={(currentFilters.positiveKeywords || []).join(";")}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setCurrentFilters((s: any) => ({
+                      ...s,
+                      positiveKeywords: value.split(";"),
+                    }));
+                  }}
+                />
+              </Col>
+
+              <Col xs={4} sm={4} md={4} lg={4}>
+                <Form.Control
+                  type="text"
+                  placeholder="Negatywne słowa kluczowe;"
+                  size="lg"
+                  value={(currentFilters.negativeKeywords || []).join(";")}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setCurrentFilters((s: any) => ({
+                      ...s,
+                      negativeKeywords: value.split(";"),
+                    }));
+                  }}
+                />
+              </Col>
+
+              <Col xs={4} sm={4} md={4} lg={4}>
+                <Form.Control
+                  type="text"
+                  placeholder="Blokujące słowa kluczowe;"
+                  size="lg"
+                  value={(currentFilters.blockingKeywords || []).join(";")}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setCurrentFilters((s: any) => ({
+                      ...s,
+                      blockingKeywords: value.split(";"),
+                    }));
+                  }}
+                />
+              </Col>
+            </Row>
+          </Container>
+        </Form.Group>
+
         <Form.Group></Form.Group>
         <Container>
           <Row>
