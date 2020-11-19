@@ -5,8 +5,7 @@ from api.models import RentOffer
 
 
 SCRAP_URLS = [
-    "https://www.olx.pl/nieruchomosci/q-wrocław-wynajem-kawalerka?search[order]=created_at%3Adesc",
-    "https://www.olx.pl/nieruchomosci/q-wrocław-wynajem-mieszkanie?search[order]=created_at%3Adesc",
+    "https://www.olx.pl/nieruchomosci/dolnoslaskie/q-wynajem-pok%C3%B3j/?search%5Bfilter_float_price%3Ato%5D=600&search%5Bdescription%5D=1&search%5Border%5D=created_at%3Adesc",
 ]
 
 
@@ -21,8 +20,8 @@ def scrapDetails(url):
     soup = BeautifulSoup(response.text, "html.parser")
     title = soup.select(".offer-titlebox h1")[0].get_text().strip()
     images = [strip_size(img.get("src")) for img in soup.select("img.vmiddle")]
-    price = int(
-        soup.select("strong.pricelabel__value")[0].get_text().replace(" ", "")[:-2]
+    price = float(
+        soup.select("strong.pricelabel__value")[0].get_text().replace(" ", "").replace(",", ".")[:-2]
     )
     details = soup.select(".offer-details")[0]
     cells = details.select(".offer-details__name")

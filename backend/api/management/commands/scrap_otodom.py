@@ -5,7 +5,7 @@ from api.models import RentOffer
 import json
 
 SCRAP_URLS = [
-    "https://www.otodom.pl/wynajem/mieszkanie/wroclaw/?search[region_id]=1&search[subregion_id]=381&search[city_id]=39&search[order]=created_at_first%3Adesc&nrAdsPerPage=72",
+    "https://www.otodom.pl/wynajem/pokoj/dolnoslaskie/?search%5Bfilter_float_price%3Ato%5D=600&search%5Border%5D=created_at_first%3Adesc&search%5Bregion_id%5D=1&nrAdsPerPage=72",
 ]
 
 
